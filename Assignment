@@ -1,0 +1,86 @@
+Assignment-4 (Voting App-Demo Practical)
+
+1)--> kubectl apply -f .
+    this will create pods for all the .yaml files present in current directory. 
+    
+2)--> kubectl get svc
+   And also for voting pod 31000 NodePort is assigned 
+   And for result pod 31001 NodePort is assigned .
+   
+3) After accessing voting app with NodePort http://52.221.204.160:31000/ in browser we are able to vote.
+   And accessing result pod  with NodePort http://52.221.204.160:31001/ in browser we are able to see result.
+   
+4) When tried deleting voting pod it created new voting pod instantly.
+    -->kubectl delete pod vote-94849dc97-r6xbv
+
+    after deleting worker it created new pod but app was not taking votes.
+     -->kubectl delete pod worker-dd46d7584-48gcl   
+     
+     [root@ip-172-31-16-102 k8s-specifications]# kubectl get po
+      NAME                      READY   STATUS            RESTARTS   AGE
+      db-b54cd94f4-84z6b        2/2     Running           0          10m
+      redis-868d64d78-bzq5r     2/2     Running           0          10m
+      result-5d57b59f4b-szmj2   2/2     Running           0          10m
+      vote-94849dc97-zf7tr      2/2     Running           0          2m17s
+      worker-dd46d7584-48gcl    2/2     Terminating       0          10m
+      worker-dd46d7584-zm47g    0/2     PodInitializing   0          6s
+
+     
+     
+    and db pod same obeservation as after deleting it created new pods instantly.
+    But deleting db pod old data of voting result is lost.
+    -->kubectl delete pod db-b54cd94f4-84z6b
+    
+    [root@ip-172-31-16-102 k8s-specifications]# kubectl get po
+    NAME                      READY   STATUS        RESTARTS   AGE
+    db-b54cd94f4-84z6b        2/2     Terminating   0          11m
+    db-b54cd94f4-d2szs        1/2     Running       0          4s
+    redis-868d64d78-bzq5r     2/2     Running       0          11m
+    result-5d57b59f4b-szmj2   2/2     Running       0          11m
+    vote-94849dc97-zf7tr      2/2     Running       0          2m48s
+    worker-dd46d7584-zm47g    2/2     Running       0          37s
+
+
+
+Assignment-1 (Replica Set)
+
+Use of Daemon set over Replica Set
+  1)When you want to gave an equal distribution of pods on each worker node
+  2)when you want to access all pods which has common and specific type of properties
+  
+  
+
+Assignment-2 (Deployment)
+
+1)create pods with deployment yaml file
+ kubectl apply -f kubia-deployment-and-service-v1.yaml
+2)change the minimum ready second to patch the updates
+kubectl patch deployment kubia -p '{"spec": {"minReadySeconds": 10}}'
+3)change the image versions whichever is required
+kubectl set image deployment kubia nodejs=luksa/kubia:v2
+kubectl set image deployment kubia nodejs=luksa/kubia:v3
+4)can follow the progress of rollout by cmd
+kubectl rollout status deployment kubia
+
+
+
+Assignment-3 (service)
+
+1)check the port status:
+command:
+sudo netstat -tulpn | grep LISTEN
+2)port is already listening -->then check the services whether it is on ClusterIP or NodePort.
+command:
+kubectl get svc
+3)If ClusterIP then -->change it to NodePort 
+command:
+kubectl edit service servicename
+4)after changing the type of Service if it is still not working then we will delete all the old pods and services and apply the replicaSet.yaml
+so that it will create the services for one more time
+command: 
+kubectl apply -f replicaSet.yaml
+5)now we will try to run the app.
+If it doesnt run then the we can change the port in replicaSet.yaml
+
+
+    
